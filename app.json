@@ -1,0 +1,9 @@
+{
+	"name": "Pass",
+
+	"requires": [
+		"chrome"
+	],
+
+	"id": "68282e6a-b1bd-4860-9969-2530474f9dab"
+}

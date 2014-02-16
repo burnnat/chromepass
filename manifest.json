@@ -1,0 +1,18 @@
+{
+	"name": "ChromePass",
+	"description": "Chrome integration for KeyPass database files.",
+	"version": "0.0.1",
+	"manifest_version": 2,
+	"offline_enabled": true,
+	"app": {
+		"background": {
+			"scripts": [
+				"background.js"
+			]
+		}
+	},
+
+	"sandbox": {
+		"pages": ["sandbox.html"]
+	}
+}

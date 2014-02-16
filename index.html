@@ -1,0 +1,35 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<style type="text/css">
+			body, html {
+				margin: 0;
+				padding: 0;
+				height: 100%;
+				overflow: hidden;
+			}
+
+			#content {
+				position: absolute;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				top: 0;
+			}
+		</style>
+		<script type="text/javascript" src="index.js"></script>
+	</head>
+	<body>
+		<div id="content">
+			<iframe
+				id="sandbox-frame"
+				height="100%"
+				width="100%"
+				frameborder="0"
+				sandbox="allow-scripts"
+				src="sandbox.html">
+			</iframe>
+		</div>
+	</body>
+</html>
