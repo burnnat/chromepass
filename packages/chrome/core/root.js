@@ -1,21 +1,25 @@
 //@require Chrome.Window
 
+Ext.USE_NATIVE_JSON = true;
+
 Ext.onReady(function() {
 	window.api = Chrome.Window;
 
-	Chrome.Window.on(
-		'unload',
-		function() {
-			var frame = document.querySelector('iframe[sandbox]:not([sandbox=""])');
+	var frame = document.querySelector('iframe[sandbox]:not([sandbox=""])');
 
-			if (frame) {
-				var sandbox = frame.contentWindow;
+	if (frame) {
+		Chrome.Window.remote = frame.contentWindow;
+	}
+	//<debug warn>
+	else {
+		Ext.log({
+			level: 'warn',
+			msg: 'Unable to locate sandboxed frame on the current page.'
+		});
+	}
+	//</debug>
 
-				sandbox.postMessage(
-					{ key: 'unload' },
-					'*'
-				);
-			}
-		}
-	);
+	Chrome.Window.remoteApi({
+		unload: true
+	});
 });

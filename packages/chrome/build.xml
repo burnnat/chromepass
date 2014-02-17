@@ -14,7 +14,17 @@
 					--recursive
 				and
 				exclude
-					--namespace=Ext,Chrome.sandbox
+					--namespace=Chrome.sandbox
+				and
+				include
+					--tag=core
+				and
+				save
+					root
+				and
+				union
+					--not
+					--namespace=Ext
 				and
 				include
 					--tag=core
@@ -23,10 +33,16 @@
 					--tag=dom
 				and
 				include
-					--class=Ext.util.Event,Ext.util.DelayedTask
+					--namespace=Ext.util.DelayedTask,Ext.util.Event,Ext.util.HashMap
 				and
 				exclude
-					--class=Ext.JSON,Ext.Template,Ext.XTemplate,Ext.XTemplateCompiler,Ext.XTemplateParser
+					--class=Ext.Template,Ext.XTemplate,Ext.XTemplateCompiler,Ext.XTemplateParser
+				and
+				save
+					allowable
+				and
+				intersect
+					--sets=root,allowable
 			]]>
 		</property>
 		<property name="build.compile.js.sandbox">
