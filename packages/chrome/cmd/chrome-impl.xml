@@ -1,0 +1,28 @@
+<project name="chrome-impl" basedir=".">
+
+	<scriptdef name="chrome-init" language="javascript">
+		<![CDATA[
+			project.setProperty(
+				"app.microloader.dir",
+				project.getProperty("workspace.packages.dir") + "/chrome/microloader"
+			);
+
+			var name = project.getProperty("chrome.frame.type") + ".js";
+
+			project.setProperty("app.microloader.development", name);
+			project.setProperty("app.microloader.testing", name);
+			project.setProperty("app.microloader.production", name);
+		]]>
+	</scriptdef>
+
+	<target name="-init-chrome-root">
+		<property name="chrome.frame.type" value="root" />
+		<chrome-init />
+	</target>
+
+	<target name="-init-chrome-sandbox">
+		<property name="chrome.frame.type" value="sandbox" />
+		<chrome-init />
+	</target>
+
+</project>

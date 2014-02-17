@@ -1,37 +1,138 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project name="chrome" default=".help">
-    <!--
-    The build-impl.xml file imported here contains the guts of the build process. It is
-    a great idea to read that file to understand how the process works, but it is best to
-    limit your changes to this file.
-    -->
-    <import file="${basedir}/.sencha/package/build-impl.xml"/>
 
-    <!--
-    The following targets can be provided to inject logic before and/or after key steps
-    of the build process:
+	<import file="${basedir}/.sencha/package/build-impl.xml"/>
+	<target name="-init-compile-js" depends="-init-compiler">
+		<property name="build.compile.js.root">
+			<![CDATA[
+				require
+					--source=Ext.util.Observable
+					--requires=Chrome.root.EventManager
+				and
+				union
+					--file=core/root.js
+					--recursive
+				and
+				exclude
+					--namespace=Ext,Chrome.sandbox
+				and
+				include
+					--tag=core
+				and
+				exclude
+					--tag=dom
+				and
+				include
+					--class=Ext.util.Event,Ext.util.DelayedTask
+				and
+				exclude
+					--class=Ext.JSON,Ext.Template,Ext.XTemplate,Ext.XTemplateCompiler,Ext.XTemplateParser
+			]]>
+		</property>
+		<property name="build.compile.js.sandbox">
+			<![CDATA[
+				require
+					--source=Ext.EventManager
+					--requires=Chrome.sandbox.EventManager
+				and
+				union
+					--tag=core
+				and
+				include
+					--file=core/sandbox.js
+					--recursive
+				and
+				exclude
+					--namespace=Chrome.root
+			]]>
+		</property>
+	</target>
 
-        The "init-local" target is used to initialize properties that may be personalized
-        for the local machine.
+	<target name="-compile-js-debug" depends="-init-compile-js">
+		<x-compile refid="${compiler.ref.id}">
+			<![CDATA[
+				--options=${build.compile.js.debug.options}
+				${build.compile.js.root}
+				and
+				concatenate
+					--remove-text-references=${build.remove.references}
+					--output-file=${build.root.debug.js}
+					${build.concat.debug.options}
+				and
+				meta
+					--json
+					--filenames
+					--output=${build.root.debug.js}on
+				and
+				${build.compile.js.sandbox}
+				and
+				concatenate
+					--remove-text-references=${build.remove.references}
+					--output-file=${build.sandbox.debug.js}
+					${build.concat.debug.options}
+				and
+				meta
+					--json
+					--filenames
+					--output=${build.sandbox.debug.js}on
+			]]>
+		</x-compile>
+	</target>
 
-            <target name="-before-init-local"/>
-            <target name="-after-init-local"/>
+	<target name="-compile-js-non-debug" depends="-init-compile-js">
+		<x-compile refid="${compiler.ref.id}">
+			<![CDATA[
+				--options=${build.compile.js.options}
+				${build.compile.js.root}
+				and
+				concatenate
+					--remove-text-references=${build.remove.references}
+					${build.compile.js.compress}
+					--output-file=${build.root.js}
+					${build.concat.options}
+				and
+				${build.compile.js.sandbox}
+				and
+				concatenate
+					--remove-text-references=${build.remove.references}
+					${build.compile.js.compress}
+					--output-file=${build.sandbox.js}
+					${build.concat.options}
+			]]>
+		</x-compile>
+	</target>
 
-        The "clean" target is used to clean build output from the build.dir.
+	<target name="install" depends="init">
+		<x-property-file file="${workspace.dir}/${app}/.sencha/app/sencha.cfg">
+			<entry
+				type="string"
+				operation="="
+				key="chrome.frame.type"
+				value="${type}" />
+		</x-property-file>
 
-            <target name="-before-clean"/>
-            <target name="-after-clean"/>
-
-        The general "init" target is used to initialize all other properties, including
-        those provided by Sencha Cmd.
-
-            <target name="-before-init"/>
-            <target name="-after-init"/>
-        
-        The "build" target performs the call to Sencha Cmd to build the application.
-
-            <target name="-before-build"/>
-            <target name="-after-build"/>
-    -->
+		<x-property-file file="${workspace.dir}/${app}/.sencha/app/build.properties">
+			<entry
+				type="string"
+				operation="="
+				key="app.microloader.dir"
+				value="${package.dir}/microloader" />
+			<entry
+				type="string"
+				operation="="
+				key="app.microloader.development"
+				value="$${chrome.frame.type}.js" />
+			<entry
+				type="string"
+				operation="="
+				key="app.microloader.testing"
+				value="$${chrome.frame.type}.js" />
+			<entry
+				type="string"
+				operation="="
+				key="app.microloader.production"
+				value="$${chrome.frame.type}.js" />
+		</x-property-file>
+	</target>
 
 </project>

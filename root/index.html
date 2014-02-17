@@ -1,0 +1,40 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<style type="text/css">
+			body, html {
+				margin: 0;
+				padding: 0;
+				height: 100%;
+				overflow: hidden;
+			}
+
+			#content {
+				position: absolute;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				top: 0;
+			}
+		</style>
+		<!-- <x-compile> -->
+			<!-- <x-bootstrap> -->
+				<script src="../packages/chrome/build/chrome-root-debug.js"></script>
+				<script src="bootstrap.js"></script>
+			<!-- </x-bootstrap> -->
+			<script src="app.js"></script>
+		<!-- </x-compile> -->
+	</head>
+	<body>
+		<div id="content">
+			<iframe
+				height="100%"
+				width="100%"
+				frameborder="0"
+				sandbox="allow-scripts"
+				src="../sandbox/index.html">
+			</iframe>
+		</div>
+	</body>
+</html>

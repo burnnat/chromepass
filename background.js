@@ -1,6 +1,6 @@
 chrome.app.runtime.onLaunched.addListener(function(launchData) {
 	chrome.app.window.create(
-		'index.html',
+		'root/index.html',
 		{
 			width: 1000,
 			height: 700

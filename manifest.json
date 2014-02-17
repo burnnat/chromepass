@@ -13,6 +13,6 @@
 	},
 
 	"sandbox": {
-		"pages": ["sandbox.html"]
+		"pages": ["sandbox/index.html"]
 	}
 }
