@@ -1,10 +1,15 @@
+//@require core.js
 //@require Chrome.Window
 
 Ext.USE_NATIVE_JSON = true;
 
-Ext.onReady(function() {
-	window.api = Chrome.Window;
+window.api = {
+	close: function() {
+		Ext.EventManager.fireUnload();
+	}
+};
 
+Ext.onReady(function() {
 	var frame = document.querySelector('iframe[sandbox]:not([sandbox=""])');
 
 	if (frame) {
@@ -21,5 +26,10 @@ Ext.onReady(function() {
 
 	Chrome.Window.remoteApi({
 		unload: true
+	});
+
+	Ext.EventManager.onWindowUnload(function() {
+		// pass unload event to sandbox frame
+		Chrome.Window.unload();
 	});
 });

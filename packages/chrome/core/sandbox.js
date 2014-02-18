@@ -1,10 +1,11 @@
+//@require core.js
 //@require Chrome.Window
 
-(function() {
+Ext.onReady(function() {
 	Chrome.Window.remote = window.top;
 	Chrome.Window.api({
 		unload: function() {
-			Chrome.Window.fireEvent('unload', this);
+			Ext.EventManager.fireUnload();
 		}
 	});
-})();
+});

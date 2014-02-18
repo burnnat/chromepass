@@ -1,23 +1,28 @@
 //@require Ext.EventManager
-//@require Chrome.Window
+//@require Chrome.root.EventManager
+
+//@define Chrome
 
 (function() {
-	var original = Ext.EventManager.addListener;
+	/*
+	 * Don't actually attach any unload event listeners to the window (this is
+	 * disallowed by Chrome). Unload listeners will still be added to the
+	 * EventManager's internal unloadEvent; we can fire these manually when we
+	 * receive notification the parent window is closing.
+	 */
 
-	var addListener = function(element, eventName) {
-		if (element === window && eventName === 'unload') {
-			Chrome.Window.on(eventName, fn, scope, options);
+	var override = Ext.Function.createInterceptor(
+		Ext.EventManager.addListener,
+		function(element, eventName) {
+			return element !== window || eventName !== 'unload';
 		}
-		else {
-			original.apply(this, arguments);
-		}
-	};
+	);
 
 	Ext.override(
 		Ext.EventManager,
 		{
-			addListener: addListener,
-			on: addListener
+			addListener: override,
+			on: override
 		}
 	);
 })();

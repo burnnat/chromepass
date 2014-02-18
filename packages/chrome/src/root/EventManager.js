@@ -1,13 +1,27 @@
+//@require Chrome
+
 /**
  *
  */
 Ext.define('Chrome.root.EventManager', {
 	singleton: true,
-	requires: ['Ext.util.Event'],
+
+	requires: [
+		'Ext.util.Event'
+	],
 
 	constructor: function() {
 		this.readyEvent = new Ext.util.Event();
 		this.idleEvent = new Ext.util.Event();
+		this.unloadEvent = new Ext.util.Event();
+	},
+
+	onWindowUnload: function(fn, scope, options) {
+		this.unloadEvent.addListener(fn, scope, options);
+	},
+
+	fireUnload: function() {
+		this.unloadEvent.fire();
 	},
 
 	onDocumentReady: function(fn, scope, options) {

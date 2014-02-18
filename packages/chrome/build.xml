@@ -3,6 +3,14 @@
 
 	<import file="${basedir}/.sencha/package/build-impl.xml"/>
 	<target name="-init-compile-js" depends="-init-compiler">
+		<x-compile refid="${compiler.ref.id}">
+			<![CDATA[
+				require
+					--source=Ext.util.Observable
+					--requires=Chrome
+			]]>
+		</x-compile>
+
 		<property name="build.compile.js.root">
 			<![CDATA[
 				require
@@ -39,27 +47,23 @@
 					--class=Ext.Template,Ext.XTemplate,Ext.XTemplateCompiler,Ext.XTemplateParser
 				and
 				save
-					allowable
+					nondom
 				and
 				intersect
-					--sets=root,allowable
+					--sets=root,nondom
 			]]>
 		</property>
 		<property name="build.compile.js.sandbox">
 			<![CDATA[
-				require
-					--source=Ext.EventManager
-					--requires=Chrome.sandbox.EventManager
-				and
 				union
-					--tag=core
-				and
-				include
 					--file=core/sandbox.js
 					--recursive
 				and
 				exclude
 					--namespace=Chrome.root
+				and
+				include
+					--tag=core
 			]]>
 		</property>
 	</target>
