@@ -61,16 +61,27 @@ Ext.define('Chrome.Window', {
 
 	api: function(methods) {
 		Ext.apply(this, methods);
+
+		this.send(
+			new Chrome.Call({
+				key: 'remoteapi',
+				data: Ext.Object.getKeys(methods)
+			})
+		);
 	},
 
-	remoteApi: function(methods) {
-		Ext.Object.each(
+	remoteapi: function(call) {
+		var methods = call.data;
+
+		Ext.Array.forEach(
 			methods,
-			function(name, fn) {
+			function(name) {
 				this[name] = Ext.Function.pass(
 					this.handleRemote,
 					[name]
 				);
+
+				console.log('Registered remote API: ' + name);
 			},
 			this
 		);

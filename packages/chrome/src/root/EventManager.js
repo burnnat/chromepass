@@ -14,6 +14,7 @@ Ext.define('Chrome.root.EventManager', {
 		this.readyEvent = new Ext.util.Event();
 		this.idleEvent = new Ext.util.Event();
 		this.unloadEvent = new Ext.util.Event();
+		this.sandboxEvent = new Ext.util.Event();
 	},
 
 	onWindowUnload: function(fn, scope, options) {
@@ -51,12 +52,7 @@ Ext.define('Chrome.root.EventManager', {
 
 	onReadyEvent: function(e) {
 		// Note: this is called in the scope of the document!
-
 		var me = Chrome.root.EventManager;
-
-		// if (e && e.type) {
-			// EventManager.onReadyChain.push(e.type);
-		// }
 
 		if (me.hasBoundOnReady) {
 			document.removeEventListener('DOMContentLoaded', me.onReadyEvent);
@@ -64,10 +60,7 @@ Ext.define('Chrome.root.EventManager', {
 
 		if (!Ext.isReady) {
 			Ext.isReady = true;
-
 			Ext.supports.init();
-			// readyEvent.onReadyChain = EventManager.onReadyChain;
-
 			me.fireReadyEvent();
 		}
 	},
@@ -85,8 +78,38 @@ Ext.define('Chrome.root.EventManager', {
 		}
 
 		this.isFiring = false;
-		// this.hasFiredReady = true;
 		this.idleEvent.fire();
+	},
+
+	onSandboxReady: function(fn, scope, options) {
+		this.sandboxEvent.addListener(fn, scope, options);
+	},
+
+	bindSandbox: function(sandbox) {
+		if (this.hasBoundOnSandbox) {
+			return;
+		}
+
+		this.sandbox = sandbox;
+
+		sandbox.addEventListener('load', this.onSandboxLoad);
+
+		this.hasBoundOnSandbox = true;
+	},
+
+	onSandboxLoad: function() {
+		// Note: this is called in the scope of the sandbox!
+		var me = Chrome.root.EventManager;
+
+		if (me.hasBoundOnSandbox) {
+			me.sandbox.removeEventListener('load', me.onSandboxLoad);
+		}
+
+		me.fireSandboxLoad();
+	},
+
+	fireSandboxLoad: function() {
+		this.sandboxEvent.fire();
 	}
 }, function() {
 	if (!Ext.EventManager) {
