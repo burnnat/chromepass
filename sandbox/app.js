@@ -1,7 +1,9 @@
 Ext.require('Ext.util.Point');
 
-Ext.application({
-	name: 'Pass',
-	extend: 'Pass.Application',
-	autoCreateViewport: true
+Ext.onReady(function() {
+	Ext.application({
+		name: 'Pass',
+		extend: 'Pass.Application',
+		autoCreateViewport: true
+	});
 });
