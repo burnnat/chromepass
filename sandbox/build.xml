@@ -40,7 +40,7 @@
     -->
 
     <import file="${basedir}/../packages/chrome/cmd/chrome-impl.xml" />
-    <target name="-before-init" depends="-init-chrome-sandbox" />
+    <target name="-after-init" depends="-init-chrome-sandbox" />
     <target name="-before-js" depends="-chrome-js"/>
 
 </project>

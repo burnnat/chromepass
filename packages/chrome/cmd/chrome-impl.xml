@@ -1,21 +1,36 @@
 <project name="chrome-impl" basedir=".">
 
-	<scriptdef name="chrome-init" language="javascript">
-<!--
-		<![CDATA[
-			project.setProperty(
-				"app.microloader.dir",
-				project.getProperty("workspace.packages.dir") + "/chrome/microloader"
-			);
+	<target name="-init-chrome">
+		<script language="javascript">
+			<![CDATA[
+				project.setProperty(
+					"app.microloader.bootstrap",
+					project.getProperty("workspace.packages.dir") + "/chrome/core/null.js"
+				);
+			]]>
+		</script>
+	</target>
 
-			var name = project.getProperty("chrome.frame.type") + ".js";
+	<target name="-init-chrome-root" depends="-init-chrome">
+		<script language="javascript">
+			<![CDATA[
+				project.setProperty("chrome.frame.type", "root");
+				project.setProperty("enable.ext41.themes", "false");
+				project.setProperty("enable.ext42.themes", "false");
+				project.setProperty("skip.sass", "true");
+				project.setProperty("skip.slice", "true");
+				project.setProperty("skip.theme", "true");
+			]]>
+		</script>
+	</target>
 
-			project.setProperty("app.microloader.development", name);
-			project.setProperty("app.microloader.testing", name);
-			project.setProperty("app.microloader.production", name);
-		]]>
--->
-	</scriptdef>
+	<target name="-init-chrome-sandbox">
+		<script language="javascript">
+			<![CDATA[
+				project.setProperty("chrome.frame.type", "sandbox");
+			]]>
+		</script>
+	</target>
 
 	<target name="-init-chrome-js">
 		<!-- Set build order modifications -->
@@ -135,16 +150,6 @@
 					-out=${build.dir}/combined.json
 			]]>
 		</x-compile>
-	</target>
-
-	<target name="-init-chrome-root">
-		<property name="chrome.frame.type" value="root" />
-		<chrome-init />
-	</target>
-
-	<target name="-init-chrome-sandbox">
-		<property name="chrome.frame.type" value="sandbox" />
-		<chrome-init />
 	</target>
 
 </project>
