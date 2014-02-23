@@ -1,5 +1,4 @@
-//@require Chrome
-
+//@tag chrome-core
 /**
  *
  */

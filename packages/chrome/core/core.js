@@ -1,7 +1,7 @@
 //@require Ext.EventManager
 //@require Chrome.root.EventManager
 
-//@define Chrome
+//@tag chrome-core
 
 (function() {
 	/*

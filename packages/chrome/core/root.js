@@ -1,6 +1,8 @@
 //@require core.js
 //@require Chrome.Window
 
+//@tag chrome-root
+
 (function() {
 	Ext.USE_NATIVE_JSON = true;
 

@@ -1,6 +1,7 @@
 <project name="chrome-impl" basedir=".">
 
 	<scriptdef name="chrome-init" language="javascript">
+<!--
 		<![CDATA[
 			project.setProperty(
 				"app.microloader.dir",
@@ -13,7 +14,128 @@
 			project.setProperty("app.microloader.testing", name);
 			project.setProperty("app.microloader.production", name);
 		]]>
+-->
 	</scriptdef>
+
+	<target name="-init-chrome-js">
+		<!-- Set build order modifications -->
+		<x-compile refid="${compiler.ref.id}">
+			<![CDATA[
+				classpath
+					--path=${workspace.packages.dir}/chrome/core
+					--name=framework
+				and
+				require
+					--scopeName=framework
+					--source=Ext.util.Observable
+					--requires=@chrome-core
+			]]>
+		</x-compile>
+
+		<!-- Compile root set -->
+		<x-compile refid="${compiler.ref.id}">
+			<![CDATA[
+				union
+					--tag=chrome-root
+					--recursive
+				and
+				exclude
+					--namespace=Chrome.sandbox
+				and
+				include
+					--tag=core
+				and
+				save
+					root
+				and
+				union
+					--not
+					--namespace=Ext
+				and
+				include
+					--tag=core
+				and
+				exclude
+					--tag=dom
+				and
+				include
+					--namespace=Ext.util.DelayedTask,Ext.util.Event,Ext.util.HashMap
+				and
+				exclude
+					--class=Ext.Template,Ext.XTemplate,Ext.XTemplateCompiler,Ext.XTemplateParser
+				and
+				save
+					nondom
+				and
+				intersect
+					--sets=root,nondom
+				and
+				save
+					chrome-root
+			]]>
+		</x-compile>
+
+		<!-- Compile sandbox set -->
+		<x-compile refid="${compiler.ref.id}">
+			<![CDATA[
+				union
+					--file=core/sandbox.js
+					--recursive
+				and
+				exclude
+					--namespace=Chrome.root
+				and
+				include
+					--tag=core
+				and
+				save
+					chrome-sandbox
+			]]>
+		</x-compile>
+	</target>
+
+	<target name="-chrome-js" depends="-init-chrome-js">
+		<if>
+			<equals arg1="${chrome.frame.type}" arg2="root"/>
+			<then>
+				<property name="chrome.filter">
+					save
+						page
+					and
+					intersect
+						--sets=page,nondom
+					and
+				</property>
+			</then>
+			<else>
+				<property name="chrome.filter" value=""/>
+			</else>
+		</if>
+
+		<x-compile refid="${compiler.ref.id}">
+			<![CDATA[
+				restore
+					page
+				and
+				meta
+					-filenames
+					-json
+					-out=${build.dir}/page.json
+				and
+				include
+					--set=chrome-${chrome.frame.type}
+				and
+				${chrome.filter}
+				save
+					page
+				and
+				meta
+					-filenames
+					-json
+					-out=${build.dir}/combined.json
+			]]>
+		</x-compile>
+	</target>
 
 	<target name="-init-chrome-root">
 		<property name="chrome.frame.type" value="root" />

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project name="Chromepass" default="production">
+
+	<target name="-production">
+		<property name="build.environment" value="production" />
+	</target>
+	<target name="production" depends="-production,-build-all" />
+
+	<target name="-testing">
+		<property name="build.environment" value="testing" />
+	</target>
+	<target name="testing" depends="-testing,-build-all" />
+
+	<target name="-build-all">
+		<ant dir="root" target="build" />
+		<ant dir="sandbox" target="build" />
+
+		<copy todir="${basedir}/build/${build.environment}">
+			<fileset dir="${basedir}">
+				<include name="manifest.json" />
+				<include name="background.js" />
+			</fileset>
+		</copy>
+	</target>
+
+</project>

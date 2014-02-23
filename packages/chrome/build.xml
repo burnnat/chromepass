@@ -2,77 +2,14 @@
 <project name="chrome" default=".help">
 
 	<import file="${basedir}/.sencha/package/build-impl.xml"/>
-	<target name="-init-compile-js" depends="-init-compiler">
-		<x-compile refid="${compiler.ref.id}">
-			<![CDATA[
-				require
-					--source=Ext.util.Observable
-					--requires=Chrome
-			]]>
-		</x-compile>
+	<import file="${basedir}/cmd/chrome-impl.xml"/>
 
-		<property name="build.compile.js.root">
-			<![CDATA[
-				require
-					--source=Ext.util.Observable
-					--requires=Chrome.root.EventManager
-				and
-				union
-					--file=core/root.js
-					--recursive
-				and
-				exclude
-					--namespace=Chrome.sandbox
-				and
-				include
-					--tag=core
-				and
-				save
-					root
-				and
-				union
-					--not
-					--namespace=Ext
-				and
-				include
-					--tag=core
-				and
-				exclude
-					--tag=dom
-				and
-				include
-					--namespace=Ext.util.DelayedTask,Ext.util.Event,Ext.util.HashMap
-				and
-				exclude
-					--class=Ext.Template,Ext.XTemplate,Ext.XTemplateCompiler,Ext.XTemplateParser
-				and
-				save
-					nondom
-				and
-				intersect
-					--sets=root,nondom
-			]]>
-		</property>
-		<property name="build.compile.js.sandbox">
-			<![CDATA[
-				union
-					--file=core/sandbox.js
-					--recursive
-				and
-				exclude
-					--namespace=Chrome.root
-				and
-				include
-					--tag=core
-			]]>
-		</property>
-	</target>
-
-	<target name="-compile-js-debug" depends="-init-compile-js">
+	<target name="-compile-js-debug" depends="-init-compile-js,-init-chrome-js">
 		<x-compile refid="${compiler.ref.id}">
 			<![CDATA[
 				--options=${build.compile.js.debug.options}
-				${build.compile.js.root}
+				restore
+					chrome-root
 				and
 				concatenate
 					--remove-text-references=${build.remove.references}
@@ -84,7 +21,8 @@
 					--filenames
 					--output=${build.root.debug.js}on
 				and
-				${build.compile.js.sandbox}
+				restore
+					chrome-sandbox
 				and
 				concatenate
 					--remove-text-references=${build.remove.references}
@@ -99,11 +37,12 @@
 		</x-compile>
 	</target>
 
-	<target name="-compile-js-non-debug" depends="-init-compile-js">
+	<target name="-compile-js-non-debug" depends="-init-compile-js,-init-chrome-js">
 		<x-compile refid="${compiler.ref.id}">
 			<![CDATA[
 				--options=${build.compile.js.options}
-				${build.compile.js.root}
+				restore
+					chrome-root
 				and
 				concatenate
 					--remove-text-references=${build.remove.references}
@@ -111,7 +50,8 @@
 					--output-file=${build.root.js}
 					${build.concat.options}
 				and
-				${build.compile.js.sandbox}
+				restore
+					chrome-sandbox
 				and
 				concatenate
 					--remove-text-references=${build.remove.references}
