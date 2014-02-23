@@ -24,7 +24,7 @@
 		</script>
 	</target>
 
-	<target name="-init-chrome-sandbox">
+	<target name="-init-chrome-sandbox" depends="-init-chrome">
 		<script language="javascript">
 			<![CDATA[
 				project.setProperty("chrome.frame.type", "sandbox");
@@ -33,15 +33,33 @@
 	</target>
 
 	<target name="-init-chrome-js">
+		<if>
+			<isset property="chrome.frame.type" />
+			<then>
+				<property name="chrome.compile.scope" value="framework" />
+
+				<property name="chrome.compile.scope.add">
+					--name=${chrome.compile.scope}
+				</property>
+				<property name="chrome.compile.scope.require">
+					--scopeName=${chrome.compile.scope}
+				</property>
+			</then>
+			<else>
+				<property name="chrome.compile.scope.add" value="" />
+				<property name="chrome.compile.scope.require" value="" />
+			</else>
+		</if>
+
 		<!-- Set build order modifications -->
 		<x-compile refid="${compiler.ref.id}">
 			<![CDATA[
 				classpath
+					${chrome.compile.scope.add}
 					--path=${workspace.packages.dir}/chrome/core
-					--name=framework
 				and
 				require
-					--scopeName=framework
+					${chrome.compile.scope.require}
 					--source=Ext.util.Observable
 					--requires=@chrome-core
 			]]>
