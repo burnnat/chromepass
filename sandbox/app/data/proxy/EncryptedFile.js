@@ -255,7 +255,7 @@ Ext.define('Pass.data.proxy.EncryptedFile', {
 
 	decryptData: function(data, key, iv) {
 		var cipherParams = CryptoJS.lib.CipherParams.create({
-			ciphertext: CryptoJS.enc.Latin1.parse(data),
+			ciphertext: CryptoJS.enc.Latin1.parse(data)
 		});
 
 		var decrypted = CryptoJS.AES.decrypt(

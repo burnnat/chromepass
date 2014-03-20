@@ -1,3 +1,7 @@
+Ext.require([
+	'Chrome.Clipboard'
+]);
+
 Chrome.onSandboxReady(function() {
 	Chrome.Window.api({
 		chooseFile: function(call) {
@@ -19,6 +23,10 @@ Chrome.onSandboxReady(function() {
 					});
 				}
 			);
+		},
+
+		copyToClipboard: function(call) {
+			Chrome.Clipboard.copy(call.data);
 		}
 	});
 });

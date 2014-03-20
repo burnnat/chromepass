@@ -25,9 +25,11 @@ Ext.define('Pass.view.Main', {
 						text: 'Open',
 						menu: [
 							{
+								itemId: 'openFile',
 								text: 'File...'
 							},
 							{
+								itemId: 'openUrl',
 								text: 'URL...'
 							}
 						]
@@ -76,6 +78,21 @@ Ext.define('Pass.view.Main', {
 				]
 			})
 		];
+
+		this.gridMenu = new Ext.menu.Menu({
+			itemId: 'entryContext',
+
+			items: [
+				{
+					itemId: 'copyUsername',
+					text: 'Copy username'
+				},
+				{
+					itemId: 'copyPassword',
+					text: 'Copy password'
+				}
+			]
+		});
 
 		this.callParent();
 	}

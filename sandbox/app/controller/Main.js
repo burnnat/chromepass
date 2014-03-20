@@ -7,6 +7,9 @@ Ext.define('Pass.controller.Main', {
 	uses: [
 		'Ext.data.TreeStore',
 		'Ext.window.MessageBox',
+
+		'Chrome.Clipboard',
+
 		'Pass.data.proxy.EncryptedFile',
 		'Pass.data.reader.NestedXml',
 		'Pass.model.Group'
@@ -20,16 +23,39 @@ Ext.define('Pass.controller.Main', {
 		{
 			ref: 'grid',
 			selector: 'gridpanel'
+		},
+		{
+			ref: 'contextMenu',
+			selector: 'menu#entryContext'
 		}
 	],
 
+	/**
+	 * @private
+	 * @property {Pass.model.Entry}
+	 */
+	activeEntry: null,
+
 	init: function() {
 		this.control({
-			'menuitem[text="File..."]': {
+			'menuitem#openFile': {
 				click: 'onOpenFile'
 			},
+
+			'menuitem#copyUsername': {
+				click: 'onCopyUsername'
+			},
+
+			'menuitem#copyPassword': {
+				click: 'onCopyPassword'
+			},
+
 			'treepanel': {
 				select: 'onGroupSelect'
+			},
+
+			'gridpanel': {
+				itemcontextmenu: 'onEntryContext'
 			}
 		});
 	},
@@ -81,11 +107,26 @@ Ext.define('Pass.controller.Main', {
 		store.load();
 	},
 
-	onGroupClick: function() {
-		console.log('click!');
-	},
-
 	onGroupSelect: function(tree, group) {
 		this.getGrid().reconfigure(group.entries());
+	},
+
+	onEntryContext: function(grid, record, item, index, e) {
+		e.stopEvent();
+
+		this.activeEntry = record;
+		this.getContextMenu().showAt(e.xy);
+	},
+
+	onCopyUsername: function() {
+		this.copyActive('username');
+	},
+
+	onCopyPassword: function() {
+		this.copyActive('password');
+	},
+
+	copyActive: function(fieldName) {
+		Chrome.Window.copyToClipboard(this.activeEntry.get(fieldName));
 	}
 });
