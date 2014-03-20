@@ -24,5 +24,9 @@ Ext.define('Pass.data.reader.NestedXml', {
 		else {
 			return this.callParent(arguments);
 		}
+	},
+
+	getAssociatedDataRoot: function(data) {
+		return data;
 	}
 });

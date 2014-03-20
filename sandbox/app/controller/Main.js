@@ -8,7 +8,8 @@ Ext.define('Pass.controller.Main', {
 		'Ext.data.TreeStore',
 		'Ext.window.MessageBox',
 		'Pass.data.proxy.EncryptedFile',
-		'Pass.data.reader.NestedXml'
+		'Pass.data.reader.NestedXml',
+		'Pass.model.Group'
 	],
 
 	refs: [
@@ -18,7 +19,7 @@ Ext.define('Pass.controller.Main', {
 		},
 		{
 			ref: 'grid',
-			selector: 'grid'
+			selector: 'gridpanel'
 		}
 	],
 
@@ -26,6 +27,9 @@ Ext.define('Pass.controller.Main', {
 		this.control({
 			'menuitem[text="File..."]': {
 				click: 'onOpenFile'
+			},
+			'treepanel': {
+				select: 'onGroupSelect'
 			}
 		});
 	},
@@ -56,16 +60,7 @@ Ext.define('Pass.controller.Main', {
 
 	loadFile: function(data, password) {
 		var store = new Ext.data.TreeStore({
-			fields:[
-				{
-					name: 'text',
-					mapping: 'Name'
-				},
-				{
-					name: 'expanded',
-					mapping: 'IsExpanded'
-				}
-			],
+			model: 'Pass.model.Group',
 
 			proxy: new Pass.data.proxy.EncryptedFile({
 				buffer: data,
@@ -84,5 +79,13 @@ Ext.define('Pass.controller.Main', {
 		this.getTree().reconfigure(store);
 
 		store.load();
+	},
+
+	onGroupClick: function() {
+		console.log('click!');
+	},
+
+	onGroupSelect: function(tree, group) {
+		this.getGrid().reconfigure(group.entries());
 	}
 });

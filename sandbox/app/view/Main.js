@@ -45,37 +45,32 @@ Ext.define('Pass.view.Main', {
 				region: 'center',
 
 				columns: [
-					{ text: 'Title', dataIndex: 'title' },
-					{ text: 'Username', dataIndex: 'username' },
-					{ text: 'Password', dataIndex: 'password' },
-					{ text: 'URL', dataIndex: 'url' }
-				],
-
-				store: new Ext.data.Store({
-					fields:[
-						'title',
-						'username',
-						'password',
-						'url'
-					],
-
-					data: [
-						{
-							title: 'Sample #1',
-							username: 'joebob',
-							password: 'temp1234',
-							url: 'http://www.google.com'
-						},
-						{
-							title: 'Sample #2',
-							username: 'admin',
-							password: 'tM4o.9/$',
-							url: 'https://github.com'
-						}
-					],
-
-					proxy: 'memory'
-				})
+					{
+						text: 'Title',
+						dataIndex: 'title',
+						flex: 1
+					},
+					{
+						text: 'Username',
+						dataIndex: 'username',
+						flex: 1
+					},
+					{
+						text: 'Password',
+						dataIndex: 'password',
+						flex: 1
+					},
+					{
+						text: 'URL',
+						dataIndex: 'url',
+						flex: 1
+					},
+					{
+						text: 'Notes',
+						dataIndex: 'notes',
+						flex: 1
+					}
+				]
 			})
 		];
 
