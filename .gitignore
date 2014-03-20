@@ -1,6 +1,8 @@
 build/
-.project
+/.project
 bootstrap.js
+!/ext/bootstrap.js
+bootstrap.json
 bootstrap.css
-sass/example/bootstrap.css
-sass/example/example.css
+*/sass/example/bootstrap.css
+*/sass/example/example.css
