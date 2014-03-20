@@ -58,6 +58,9 @@ Ext.define('Pass.view.Main', {
 					{
 						text: 'Password',
 						dataIndex: 'password',
+						renderer: function() {
+							return Ext.String.repeat('*', 8);
+						},
 						flex: 1
 					},
 					{

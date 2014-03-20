@@ -147,6 +147,22 @@ Ext.define('Pass.data.proxy.EncryptedFile', {
 				)
 		);
 
+		var streamKey = CryptoJS.SHA256(
+			CryptoJS.enc.Latin1.parse(
+				header[ids.ProtectedStreamKey]
+			)
+		);
+		console.log("Protected Stream Key: " + streamKey);
+
+		streamKey = streamKey.toString(CryptoJS.enc.Latin1);
+
+		this.assert(
+			streamKey.length,
+			32,
+			"Invalid protected stream key"
+		);
+
+		this.unprotectValues(xml, streamKey);
 		this.xml = xml;
 
 		return xml;
@@ -302,8 +318,53 @@ Ext.define('Pass.data.proxy.EncryptedFile', {
 			gzipData += blockData;
 		}
 
-		// ignore first 10 bytes for GZip header
-		return zip_inflate(gzipData.substring(10));
+		return this.decodeUtf8(
+			zip_inflate(
+				// ignore first 10 bytes for GZip header
+				gzipData.substring(10)
+			)
+		);
+	},
+
+	unprotectValues: function(data, streamKey) {
+		var salsaKey = new Array(32);
+
+		for (var i = 0; i < 32; ++i) {
+			salsaKey[i] = streamKey.charCodeAt(i) & 0xFF;
+		}
+
+		var iv = new Uint8Array([0xE8, 0x30, 0x09, 0x4B, 0x97, 0x20, 0x5D, 0x2A]);
+		var salsa = new Salsa20(salsaKey, iv);
+
+		var reader = this.getReader();
+
+		Ext.Array.forEach(
+			Ext.dom.Query.select('*[Protected=True]', data),
+			function(node) {
+				var textNode = node.firstChild;
+
+				if (!textNode) {
+					return;
+				}
+
+				var value = atob(textNode.nodeValue);
+				var xorbuf = salsa.getBytes(value.length);
+
+				var r = new Array();
+
+				for (var k = 0; k < value.length; ++k) {
+					r[k] = String.fromCharCode(value.charCodeAt(k) ^ xorbuf[k]);
+				}
+
+				textNode.nodeValue = this.decodeUtf8(r.join(''));
+				node.removeAttribute('Protected');
+			},
+			this
+		);
+	},
+
+	decodeUtf8: function(value) {
+		return decodeURIComponent(escape(value));
 	},
 
 	assert: function(actual, expected, message) {
