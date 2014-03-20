@@ -1,14 +1,11 @@
 /**
  * Server:
  *
- *     Chrome.Window.api(
- *         window.top,
- *         {
- *             add: function(call) {
- *                 call.respond(call.data.first + call.data.second);
- *             }
+ *     Chrome.Window.api({
+ *         add: function(call) {
+ *             call.respond(call.data.first + call.data.second);
  *         }
- *     );
+ *     });
  *
  * Client:
  *

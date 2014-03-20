@@ -1,8 +1,24 @@
 Chrome.onSandboxReady(function() {
 	Chrome.Window.api({
-		add: function(call) {
-			var data = call.data;
-			call.respond(data.first + data.second);
+		chooseFile: function(call) {
+			chrome.fileSystem.chooseEntry(
+				{ type: 'openFile' },
+				function(entry) {
+					entry.file(function(file) {
+						var reader = new FileReader();
+
+						reader.onerror = function() {
+							call.respond(null);
+						};
+
+						reader.onloadend = function(e) {
+							call.respond(e.target.result);
+						};
+
+						reader.readAsArrayBuffer(file);
+					});
+				}
+			);
 		}
 	});
 });

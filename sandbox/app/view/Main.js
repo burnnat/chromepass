@@ -38,17 +38,7 @@ Ext.define('Pass.view.Main', {
 				title: 'Categories',
 				region: 'west',
 				width: 150,
-
-				store: new Ext.data.TreeStore({
-					root: {
-						text: "Database",
-						expanded: true,
-						children: [
-							{ text: "Internet", leaf: true },
-							{ text: "Financial", leaf: true }
-						]
-					}
-				})
+				rootVisible: false
 			}),
 			new Ext.grid.Panel({
 				title: 'Accounts',
