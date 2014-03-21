@@ -2,7 +2,7 @@
  * Provides access for writing to the system clipboard.
  * Requires the `clipboardWrite` permission to function.
  */
-Ext.define('Chrome.Clipboard', {
+Ext.define('Chrome.util.Clipboard', {
 	singleton: true,
 
 	copy: function(data) {

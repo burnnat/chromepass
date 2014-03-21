@@ -1,5 +1,5 @@
 Ext.require([
-	'Chrome.Clipboard'
+	'Chrome.util.Clipboard'
 ]);
 
 Chrome.onSandboxReady(function() {

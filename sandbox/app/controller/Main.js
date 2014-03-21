@@ -8,11 +8,12 @@ Ext.define('Pass.controller.Main', {
 		'Ext.data.TreeStore',
 		'Ext.window.MessageBox',
 
-		'Chrome.Clipboard',
+		'Chrome.util.Clipboard',
 
 		'Pass.data.proxy.EncryptedFile',
 		'Pass.data.reader.NestedXml',
-		'Pass.model.Group'
+		'Pass.model.Group',
+		'Pass.view.KeyDialog'
 	],
 
 	refs: [
@@ -64,21 +65,14 @@ Ext.define('Pass.controller.Main', {
 		Chrome.Window.chooseFile(
 			null,
 			function(call) {
-				Ext.MessageBox.show({
-					title: 'Enter Password',
-					msg: 'Please enter your password:',
-
-					prompt: true,
-					closable: false,
-					buttons: Ext.MessageBox.OKCANCEL,
-
-					fn: function(buttonId, text) {
-						if (buttonId === 'ok') {
-							this.loadFile(call.data, text);
-						}
+				var dialog = new Pass.view.KeyDialog({
+					callback: function(dialog, values) {
+						this.loadFile(call.data, values.masterKey);
 					},
 					scope: this
 				});
+
+				dialog.show();
 			},
 			this
 		);

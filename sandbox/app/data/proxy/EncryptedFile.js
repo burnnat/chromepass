@@ -26,6 +26,11 @@ Ext.define('Pass.data.proxy.EncryptedFile', {
 	password: null,
 
 	/**
+	 * @cfg
+	 */
+	keyFile: null,
+
+	/**
 	 * @private
 	 * @property
 	 */
@@ -33,9 +38,22 @@ Ext.define('Pass.data.proxy.EncryptedFile', {
 
 	constructor: function() {
 		this.callParent(arguments);
-		this.compositeKey = this.combineKeys([
-			CryptoJS.SHA256(this.password)
-		]);
+
+		var keys = [];
+
+		var password = this.password;
+
+		if (password !== null) {
+			keys.push(CryptoJS.SHA256(this.password));
+		}
+
+		var keyFile = this.keyFile;
+
+		if (keyFile !== null) {
+			// TODO: add key file to composite key
+		}
+
+		this.compositeKey = this.combineKeys(keys);
 	},
 
 	combineKeys: function(keys) {
