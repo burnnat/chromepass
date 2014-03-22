@@ -43,14 +43,14 @@ Ext.define('Pass.data.proxy.EncryptedFile', {
 
 		var password = this.password;
 
-		if (password !== null) {
+		if (password != null) {
 			keys.push(CryptoJS.SHA256(this.password));
 		}
 
 		var keyFile = this.keyFile;
 
-		if (keyFile !== null) {
-			// TODO: add key file to composite key
+		if (keyFile != null) {
+			var dataview = this.parseKeyFile(keyFile);
 		}
 
 		this.compositeKey = this.combineKeys(keys);
@@ -111,6 +111,53 @@ Ext.define('Pass.data.proxy.EncryptedFile', {
 		}
 
 		Ext.callback(callback, scope, [operation]);
+	},
+
+	parseKeyFile: function(keyFile) {
+		var dataView = new jDataView(keyFile, 0, keyFile.length, true);
+		var data = dataView.getString();
+
+		var xml = new DOMParser().parseFromString(data, "text/xml");
+		var keyData = Ext.dom.Query.selectNode('KeyFile > Key > Data', xml);
+
+		if (keyData) {
+			// test XML key file
+			keyData = atob(keyData.textContent);
+
+			if (keyData.length == 32) {
+				keyData = CryptoJS.enc.Latin1.parse(keyData);
+			}
+			else {
+				keyData = null;
+			}
+		}
+		else {
+			keyData = null;
+		}
+
+		if (keyData == null) {
+			// not XML key file
+			if (data.length == 32) {
+				// test 32-byte key file
+				keyData = CryptoJS.enc.Latin1.parse(data);
+			}
+			else if (data.length == 64) {
+				// not 32-byte key, test 64-byte hex encoded
+				keyData = CryptoJS.enc.Hex.parse(data);
+
+				if (keyData.length != 32) {
+					keyData = null;
+				}
+			}
+		}
+
+		if (keyData == null) {
+			// not XML and not key file
+			keyData = CryptoJS.enc.Latin1.parse(data);
+			keyData = CryptoJS.SHA256(keyData);
+		}
+
+		return keyData;
 	},
 
 	parseData: function(operation, dataView) {

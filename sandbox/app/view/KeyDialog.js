@@ -8,6 +8,9 @@ Ext.define('Pass.view.KeyDialog', {
 		'Ext.form.Panel',
 		'Ext.form.field.Text',
 		'Ext.form.field.File',
+
+		'Chrome.util.File',
+
 		'Pass.form.FieldSelector'
 	],
 
@@ -53,6 +56,7 @@ Ext.define('Pass.view.KeyDialog', {
 
 						field: {
 							xtype: 'filefield',
+							itemId: 'keyFile',
 							name: 'keyFile'
 						}
 					}
@@ -77,12 +81,37 @@ Ext.define('Pass.view.KeyDialog', {
 	},
 
 	onOkay: function() {
+		var values = {};
+
 		// Get values prior to closing the window as the fields will be destroyed
-		var values = this.child('form').getValues();
+		Ext.Array.forEach(
+			this.query('fieldselector'),
+			function(selector) {
+				if (selector.isSelected()) {
+					values[selector.field.name] = selector.getValue();
+				}
+			}
+		);
 
 		this.close();
 
-		Ext.callback(this.callback, this.scope, [this, values]);
+		if (values.keyFile) {
+			// Key file input is enabled, read the actual value of the file
+			Chrome.util.File.readAsBuffer(
+				values.keyFile,
+				{
+					callback: function(success, buffer) {
+						values.keyFile = buffer;
+						Ext.callback(this.callback, this.scope, [this, values]);
+					},
+					scope: this
+				}
+			);
+		}
+		else {
+			// No key file, proceed straight to callback
+			Ext.callback(this.callback, this.scope, [this, values]);
+		}
 	},
 
 	onCancel: function() {

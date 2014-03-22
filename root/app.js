@@ -1,25 +1,28 @@
 Ext.require([
-	'Chrome.util.Clipboard'
+	'Chrome.util.Clipboard',
+	'Chrome.util.File'
 ]);
 
 Chrome.onSandboxReady(function() {
 	Chrome.Window.api({
 		chooseFile: function(call) {
 			chrome.fileSystem.chooseEntry(
-				{ type: 'openFile' },
+				Ext.apply(
+					call.data || {},
+					{
+						type: 'openFile'
+					}
+				),
 				function(entry) {
 					entry.file(function(file) {
-						var reader = new FileReader();
-
-						reader.onerror = function() {
-							call.respond(null);
-						};
-
-						reader.onloadend = function(e) {
-							call.respond(e.target.result);
-						};
-
-						reader.readAsArrayBuffer(file);
+						Chrome.util.File.readAsBuffer(
+							file,
+							{
+								callback: function(success, buffer) {
+									call.respond(buffer);
+								}
+							}
+						);
 					});
 				}
 			);

@@ -49,6 +49,21 @@ Ext.define('Pass.form.FieldSelector', {
 		);
 	},
 
+	isSelected: function() {
+		return this.checkbox.getValue();
+	},
+
+	getValue: function() {
+		var field = this.field;
+
+		if (field.isFileUpload()) {
+			return field.fileInputEl.dom.files[0];
+		}
+		else {
+			return field.getValue();
+		}
+	},
+
 	onCheckChange: function(checkbox, value) {
 		if (value === false) {
 			this.field.reset();

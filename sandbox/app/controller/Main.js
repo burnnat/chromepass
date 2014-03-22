@@ -63,11 +63,18 @@ Ext.define('Pass.controller.Main', {
 
 	onOpenFile: function() {
 		Chrome.Window.chooseFile(
-			null,
+			{
+				accepts: [
+					{
+						description: 'KeePass database files',
+						extensions: ['kdbx']
+					}
+				]
+			},
 			function(call) {
 				var dialog = new Pass.view.KeyDialog({
 					callback: function(dialog, values) {
-						this.loadFile(call.data, values.masterKey);
+						this.loadFile(call.data, values.masterKey, values.keyFile);
 					},
 					scope: this
 				});
@@ -78,13 +85,14 @@ Ext.define('Pass.controller.Main', {
 		);
 	},
 
-	loadFile: function(data, password) {
+	loadFile: function(data, password, keyFile) {
 		var store = new Ext.data.TreeStore({
 			model: 'Pass.model.Group',
 
 			proxy: new Pass.data.proxy.EncryptedFile({
 				buffer: data,
 				password: password,
+				keyFile: keyFile,
 
 				reader: new Pass.data.reader.NestedXml({
 					type: 'xml',
