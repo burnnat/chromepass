@@ -43,6 +43,10 @@ Ext.define('Pass.controller.Main', {
 				click: 'onOpenFile'
 			},
 
+			'menuitem#openEntryUrl': {
+				click: 'onOpenEntryUrl'
+			},
+
 			'menuitem#copyUsername': {
 				click: 'onCopyUsername'
 			},
@@ -118,6 +122,15 @@ Ext.define('Pass.controller.Main', {
 
 		this.activeEntry = record;
 		this.getContextMenu().showAt(e.xy);
+	},
+
+	onOpenEntryUrl: function() {
+		Chrome.Window.notifyExternal({
+			action: 'open',
+			data: {
+				url: this.activeEntry.get('url')
+			}
+		});
 	},
 
 	onCopyUsername: function() {

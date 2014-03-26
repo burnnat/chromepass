@@ -90,6 +90,10 @@ Ext.define('Pass.view.Main', {
 				{
 					itemId: 'copyPassword',
 					text: 'Copy password'
+				},
+				{
+					itemId: 'openEntryUrl',
+					text: 'Open URL'
 				}
 			]
 		});

@@ -30,6 +30,19 @@ Chrome.onSandboxReady(function() {
 
 		copyToClipboard: function(call) {
 			Chrome.Clipboard.copy(call.data);
+		},
+
+		notifyExternal: function(call) {
+			var data = call.data;
+
+			chrome.runtime.getBackgroundPage(
+				function(page) {
+					page.notifyExternal(
+						data.action,
+						data.data
+					);
+				}
+			);
 		}
 	});
 });

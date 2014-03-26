@@ -16,3 +16,19 @@ chrome.app.runtime.onLaunched.addListener(function(launchData) {
 		}
 	);
 });
+
+var EXTENSION_ID = 'nebajhfbjdffeoondgfjcaknnlhgkpjk';
+
+/**
+ * @param {String} action
+ * @param {Object} data
+ */
+window.notifyExternal = function(action, data) {
+	chrome.runtime.sendMessage(
+		EXTENSION_ID,
+		{
+			action: action,
+			data: data
+		}
+	);
+};
