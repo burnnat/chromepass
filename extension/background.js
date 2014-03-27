@@ -1,15 +1,76 @@
+var api = {
+	open: function(data, callback) {
+		chrome.windows.getLastFocused(function(win) {
+			chrome.tabs.create(
+				{
+					windowId: win.id,
+					url: data.url,
+					active: true
+				},
+				function() {
+					chrome.windows.update(
+						win.id,
+						{
+							focused: true
+						},
+						function() {
+							callback({ success: true });
+						}
+					);
+				}
+			);
+		});
+	},
+
+	autotype: function(data, callback) {
+		chrome.windows.getLastFocused(function(win) {
+			chrome.windows.update(
+				win.id,
+				{
+					focused: true
+				}
+			);
+
+			chrome.tabs.query(
+				{
+					windowId: win.id,
+					active: true
+				},
+				function(tabs) {
+					var tab = tabs[0];
+
+					chrome.tabs.executeScript(
+						tab.id,
+						{
+							file: 'autotype.js'
+						},
+						function() {
+							chrome.tabs.executeScript(
+								tab.id,
+								{
+									code: 'autotype(' + JSON.stringify(data) + ');'
+								},
+								function() {
+									callback({ success: true });
+								}
+							);
+						}
+					);
+				}
+			);
+		});
+	}
+};
+
 chrome.runtime.onMessageExternal.addListener(
 	function(request, sender, sendResponse) {
-		console.log('Extension received message');
-		console.log(request);
+		var fn = api[request.action];
 
-		switch (request.action) {
-			case 'open':
-				chrome.tabs.create({
-					url: request.data.url
-				});
-
-				return;
+		if (!fn) {
+			sendResponse({ success: false });
+		}
+		else {
+			fn(request.data, sendResponse);
 		}
 	}
 );
