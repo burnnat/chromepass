@@ -29,7 +29,7 @@ Chrome.onSandboxReady(function() {
 		},
 
 		copyToClipboard: function(call) {
-			Chrome.Clipboard.copy(call.data);
+			Chrome.util.Clipboard.copy(call.data);
 		},
 
 		notifyExternal: function(call) {
