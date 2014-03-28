@@ -84,7 +84,11 @@ var exports = window;
 
 				case '\n':
 					if (el.form) {
-						el.form.submit();
+						// Normally one would simply call el.form.submit(), however in
+						// the event that the form contains an element named "submit"
+						// the submit function will be overshadowed - so we "borrow" the
+						// submit function from a pristine form instead.
+						document.createElement('form').submit.call(el.form);
 					}
 
 					return;

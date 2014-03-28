@@ -55,6 +55,10 @@ Ext.define('Pass.controller.Main', {
 				click: 'onCopyPassword'
 			},
 
+			'menuitem#autoType': {
+				click: 'onAutoType'
+			},
+
 			'treepanel': {
 				select: 'onGroupSelect'
 			},
@@ -117,11 +121,14 @@ Ext.define('Pass.controller.Main', {
 		this.getGrid().reconfigure(group.entries());
 	},
 
-	onEntryContext: function(grid, record, item, index, e) {
+	onEntryContext: function(grid, entry, item, index, e) {
 		e.stopEvent();
 
-		this.activeEntry = record;
-		this.getContextMenu().showAt(e.xy);
+		var menu = this.getContextMenu();
+		this.activeEntry = entry;
+
+		menu.down('#autoType').setDisabled(!entry.get('autoTypeEnabled'));
+		menu.showAt(e.xy);
 	},
 
 	onOpenEntryUrl: function() {
@@ -129,6 +136,39 @@ Ext.define('Pass.controller.Main', {
 			action: 'open',
 			data: {
 				url: this.activeEntry.get('url')
+			}
+		});
+	},
+
+	onAutoType: function() {
+		var entry = this.activeEntry;
+
+		if (!entry.get('autoTypeEnabled')) {
+			return;
+		}
+
+		var text = entry.get('autoTypeSequence') || '{USERNAME}{TAB}{PASSWORD}{ENTER}';
+
+		text = text.replace(
+			/\{(.*?)\}/g,
+			function(match, key) {
+				switch (key.toLowerCase()) {
+					case 'username':
+						return entry.get('username');
+					case 'password':
+						return entry.get('password');
+					case 'tab':
+						return '\t';
+					case 'enter':
+						return '\n';
+				}
+			}
+		);
+
+		Chrome.Window.notifyExternal({
+			action: 'autotype',
+			data: {
+				text: text
 			}
 		});
 	},

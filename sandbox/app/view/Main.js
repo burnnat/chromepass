@@ -94,6 +94,10 @@ Ext.define('Pass.view.Main', {
 				{
 					itemId: 'openEntryUrl',
 					text: 'Open URL'
+				},
+				{
+					itemId: 'autoType',
+					text: 'Auto-Type in Chrome'
 				}
 			]
 		});
