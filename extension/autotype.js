@@ -68,6 +68,21 @@ var exports = window;
 		);
 	};
 
+	var inject = function(fn, callback) {
+		var script = document.createElement('script');
+		script.textContent = 'window.postMessage((' + fn + ')(),"*");';
+
+		var listener = function(event) {
+			window.removeEventListener('message', listener);
+			callback(event.data);
+		};
+
+		window.addEventListener('message', listener);
+
+		(document.head || document.documentElement).appendChild(script);
+		script.parentNode.removeChild(script);
+	};
+
 	exports.autotype = function(data) {
 		var focusables = getFocusables();
 		var el = document.activeElement;
@@ -83,12 +98,44 @@ var exports = window;
 					return;
 
 				case '\n':
-					if (el.form) {
-						// Normally one would simply call el.form.submit(), however in
-						// the event that the form contains an element named "submit"
-						// the submit function will be overshadowed - so we "borrow" the
-						// submit function from a pristine form instead.
-						document.createElement('form').submit.call(el.form);
+					var form = el.form;
+
+					if (form) {
+						var submitForm = function() {
+							var submitEl = form.querySelector('input[type="submit"],input[type="image"]');
+
+							if (submitEl) {
+								// If the form contains a submit button or image, we want to use
+								// that to submit the form, as it may have onclick listeners.
+								submitEl.click();
+							}
+							else {
+								// For forms without a submit element, we submit the form directly.
+								// Normally one would simply call el.form.submit(), however in
+								// the event that the form contains an element named "submit"
+								// the submit function will be overshadowed - so we "borrow" the
+								// submit function from a pristine form element instead.
+								document.createElement('form').submit.call(form);
+							}
+						};
+
+						// Get the onsubmit attribute, if the form has one
+						var onsubmit = form.getAttribute('onsubmit');
+
+						if (onsubmit) {
+							// Execute onsubmit handler, then the default form submit if successful
+							inject(
+								new Function(onsubmit),
+								function(result) {
+									if (result !== false) {
+										submitForm();
+									}
+								}
+							);
+						}
+						else {
+							submitForm();
+						}
 					}
 
 					return;
