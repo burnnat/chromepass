@@ -81,36 +81,37 @@ Ext.define('Pass.data.proxy.EncryptedFile', {
 
 	read: function(operation, callback, scope) {
 		var buffer = this.buffer;
+		var reader = this.getReader();
 
-		try {
-			var data = this.parseData(
-				operation,
-				new jDataView(buffer, 0, buffer.length, true)
+		this.parseData(this.buffer)
+			.then(
+				function(data) {
+					var result = reader.read(data);
+
+					if (result.success !== false) {
+						operation.resultSet = result;
+						operation.commitRecords(result.records);
+						operation.setCompleted();
+						operation.setSuccessful();
+					}
+					else {
+						operation.setException(result.message);
+					}
+				}
+			)
+			.catch(
+				function(e) {
+					var error = e.message;
+
+					console.error(error);
+					operation.setException(error);
+				}
+			)
+			.then(
+				function() {
+					Ext.callback(callback, scope, [operation]);
+				}
 			);
-
-			var result = this.getReader().read(data);
-
-			if (result.success !== false) {
-				operation.resultSet = result;
-				operation.commitRecords(result.records);
-				operation.setCompleted();
-				operation.setSuccessful();
-			}
-			else {
-				operation.setException(result.message);
-			}
-		}
-		catch (e) {
-			if (Ext.isString(e)) {
-				console.error(e);
-				operation.setException(e);
-			}
-			else {
-				throw e;
-			}
-		}
-
-		Ext.callback(callback, scope, [operation]);
 	},
 
 	parseKeyFile: function(keyFile) {
@@ -160,77 +161,74 @@ Ext.define('Pass.data.proxy.EncryptedFile', {
 		return keyData;
 	},
 
-	parseData: function(operation, dataView) {
+	parseData: function(buffer) {
+		var me = this;
+		var ids = me.constants;
+
 		if (this.xml) {
-			return xml;
+			return Promise.resolve(this.xml);
 		}
 
-		var ids = this.constants;
+		return new Promise(function(resolve, reject) {
+			var dataView = new jDataView(buffer, 0, buffer.length, true);
 
-		var sig1 = dataView.getUint32();
-		this.assert(sig1, 0x9AA2D903, "Invalid version");
+			var sig1 = dataView.getUint32();
+			me.assert(sig1, 0x9AA2D903, "Invalid version");
 
-		var sig2 = dataView.getUint32();
-		this.assert(sig2, 0xB54BFB67, "Invalid version");
+			var sig2 = dataView.getUint32();
+			me.assert(sig2, 0xB54BFB67, "Invalid version");
 
-		var fileVersion = dataView.getUint32();
-		this.assert(fileVersion, 0x00030001, "Invalid file version");
+			var fileVersion = dataView.getUint32();
+			me.assert(fileVersion, 0x00030001, "Invalid file version");
 
-		var header = this.parseHeader(dataView);
+			me.parseHeader(dataView)
+				.delay(2)
+				.then(function(header) {
+					me.getAes(header)
+						.then(function(aes) {
+							return me.decryptData(dataView.getString(), aes.key, aes.iv);
+						})
+						.delay(2)
+						.then(function(decrypted) {
+							dataView = new jDataView(decrypted, 0, decrypted.length, true);
 
-		var transformedKey = this.getTransformedKey(header[ids.TransformSeed], header[ids.TransformRounds]);
-		console.log("Transformed Key: " + transformedKey);
+							me.assert(
+								dataView.getString(32),
+								header[ids.StreamStartBytes],
+								"Start bytes do not match"
+							);
 
-		var masterSeed = (
-			CryptoJS.enc.Latin1
-				.parse(header[ids.MasterSeed])
-				.toString(CryptoJS.enc.Hex)
-		);
+							var xml = (
+								new DOMParser()
+									.parseFromString(
+										me.inflateData(dataView),
+										'text/xml'
+									)
+							);
 
-		var combinedKey = CryptoJS.enc.Hex.parse(masterSeed + transformedKey);
+							var streamKey = CryptoJS.SHA256(
+								CryptoJS.enc.Latin1.parse(
+									header[ids.ProtectedStreamKey]
+								)
+							);
+							console.log("Protected Stream Key: " + streamKey);
 
-		var aesKey = CryptoJS.SHA256(combinedKey);
-		console.log("AES Key: " + aesKey);
+							streamKey = streamKey.toString(CryptoJS.enc.Latin1);
 
-		var aesIV = CryptoJS.enc.Latin1.parse(header[ids.EncryptionIV]);
-		console.log("AES IV: " + aesIV);
+							me.assert(
+								streamKey.length,
+								32,
+								"Invalid protected stream key"
+							);
 
-		var decrypted = this.decryptData(dataView.getString(), aesKey, aesIV);
-		dataView = new jDataView(decrypted, 0, decrypted.length, true);
+							me.unprotectValues(xml, streamKey);
+							me.xml = xml;
 
-		this.assert(
-			dataView.getString(32),
-			header[ids.StreamStartBytes],
-			"Start bytes do not match"
-		);
+							resolve(xml);
+						});
+				});
 
-		var xml = (
-			new DOMParser()
-				.parseFromString(
-					this.inflateData(dataView),
-					'text/xml'
-				)
-		);
-
-		var streamKey = CryptoJS.SHA256(
-			CryptoJS.enc.Latin1.parse(
-				header[ids.ProtectedStreamKey]
-			)
-		);
-		console.log("Protected Stream Key: " + streamKey);
-
-		streamKey = streamKey.toString(CryptoJS.enc.Latin1);
-
-		this.assert(
-			streamKey.length,
-			32,
-			"Invalid protected stream key"
-		);
-
-		this.unprotectValues(xml, streamKey);
-		this.xml = xml;
-
-		return xml;
+		});
 	},
 
 	parseHeader: function(dataView) {
@@ -281,7 +279,39 @@ Ext.define('Pass.data.proxy.EncryptedFile', {
 			"Not AES"
 		);
 
-		return header;
+		return Promise.resolve(header);
+	},
+
+	getAes: function(header) {
+		var ids = this.constants;
+
+		return (
+			this.getTransformedKey(
+				header[ids.TransformSeed],
+				header[ids.TransformRounds]
+			).then(function(transformedKey) {
+				console.log("Transformed Key: " + transformedKey);
+
+				var masterSeed = (
+					CryptoJS.enc.Latin1
+						.parse(header[ids.MasterSeed])
+						.toString(CryptoJS.enc.Hex)
+				);
+
+				var combinedKey = CryptoJS.enc.Hex.parse(masterSeed + transformedKey);
+
+				var aesKey = CryptoJS.SHA256(combinedKey);
+				console.log("AES Key: " + aesKey);
+
+				var aesIV = CryptoJS.enc.Latin1.parse(header[ids.EncryptionIV]);
+				console.log("AES IV: " + aesIV);
+
+				return {
+					key: aesKey,
+					iv: aesIV
+				};
+			})
+		);
 	},
 
 	getTransformedKey: function(seed, rounds) {
@@ -294,28 +324,44 @@ Ext.define('Pass.data.proxy.EncryptedFile', {
 		var key = CryptoJS.enc.Latin1.parse(seed);
 		var iv = CryptoJS.enc.Hex.parse((new Array(16)).join("\x00"));
 
-		for (var i = 0; i < rounds; ++i) {
-			for (var j = 0; j < 2; ++j) {
-				var encrypted = CryptoJS.AES.encrypt(
-					tmpKey[j],
-					key,
-					{
-						mode: CryptoJS.mode.ECB,
-						iv: iv,
-						padding: CryptoJS.pad.NoPadding
-					}
-				);
+		var sequence = Promise.resolve(tmpKey);
 
-				tmpKey[j] = encrypted.ciphertext;
+		console.log('Transforming with ' + rounds + ' rounds');
+
+		for (var i = 0; i < rounds; ++i) {
+			sequence = sequence.then(function(tmpKey) {
+				for (var j = 0; j < 2; ++j) {
+					var encrypted = CryptoJS.AES.encrypt(
+						tmpKey[j],
+						key,
+						{
+							mode: CryptoJS.mode.ECB,
+							iv: iv,
+							padding: CryptoJS.pad.NoPadding
+						}
+					);
+
+					tmpKey[j] = encrypted.ciphertext;
+				}
+
+				return tmpKey;
+			});
+
+			if (i % 1000 === 0) {
+				sequence = sequence.delay(2);
 			}
 		}
 
-		tmpKey = CryptoJS.enc.Hex.parse(
-			tmpKey[0].toString(CryptoJS.enc.Hex) +
-			tmpKey[1].toString(CryptoJS.enc.Hex)
-		);
-
-		return CryptoJS.SHA256(tmpKey).toString(CryptoJS.enc.Hex);
+		return sequence.then(function(tmpKey) {
+			return (
+				CryptoJS.SHA256(
+					CryptoJS.enc.Hex.parse(
+						tmpKey[0].toString(CryptoJS.enc.Hex) +
+						tmpKey[1].toString(CryptoJS.enc.Hex)
+					)
+				).toString(CryptoJS.enc.Hex)
+			);
+		});
 	},
 
 	decryptData: function(data, key, iv) {
@@ -335,7 +381,7 @@ Ext.define('Pass.data.proxy.EncryptedFile', {
 
 		// console.log("Decrypted: " + decrypted);
 
-		return decrypted.toString(CryptoJS.enc.Latin1);
+		return Promise.resolve(decrypted.toString(CryptoJS.enc.Latin1));
 	},
 
 	inflateData: function(dataView) {
@@ -434,7 +480,7 @@ Ext.define('Pass.data.proxy.EncryptedFile', {
 
 	assert: function(actual, expected, message) {
 		if (actual !== expected) {
-			throw message + " (expected " + expected + ", actually " + actual + ")";
+			throw new Error(message + " (expected " + expected + ", actually " + actual + ")");
 		}
 	}
 });

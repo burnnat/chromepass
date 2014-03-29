@@ -18,6 +18,10 @@ Ext.define('Pass.controller.Main', {
 
 	refs: [
 		{
+			ref: 'viewport',
+			selector: 'viewport'
+		},
+		{
 			ref: 'tree',
 			selector: 'treepanel'
 		},
@@ -94,6 +98,8 @@ Ext.define('Pass.controller.Main', {
 	},
 
 	loadFile: function(data, password, keyFile) {
+		this.getViewport().setLoading('Loading...');
+
 		var store = new Ext.data.TreeStore({
 			model: 'Pass.model.Group',
 
@@ -114,7 +120,12 @@ Ext.define('Pass.controller.Main', {
 
 		this.getTree().reconfigure(store);
 
-		store.load();
+		store.load({
+			callback: function() {
+				this.getViewport().setLoading(false);
+			},
+			scope: this
+		});
 	},
 
 	onGroupSelect: function(tree, group) {
