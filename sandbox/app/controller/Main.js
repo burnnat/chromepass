@@ -47,6 +47,10 @@ Ext.define('Pass.controller.Main', {
 				click: 'onOpenFile'
 			},
 
+			'menuitem#openUrl': {
+				click: 'onOpenUrl'
+			},
+
 			'menuitem#openEntryUrl': {
 				click: 'onOpenEntryUrl'
 			},
@@ -84,17 +88,46 @@ Ext.define('Pass.controller.Main', {
 				]
 			},
 			function(call) {
-				var dialog = new Pass.view.KeyDialog({
-					callback: function(dialog, values) {
-						this.loadFile(call.data, values.masterKey, values.keyFile);
-					},
-					scope: this
-				});
-
-				dialog.show();
+				this.openDatabase(call.data);
 			},
 			this
 		);
+	},
+
+	onOpenUrl: function() {
+		Ext.MessageBox.prompt(
+			'Open URL',
+			'Enter the URL to open:',
+			function(button, url) {
+				if (button !== 'ok') {
+					return;
+				}
+
+				Chrome.Window.openUrl(
+					url,
+					function(call) {
+						var data = call.data;
+
+						if (data.success) {
+							this.openDatabase(data.response);
+						}
+					},
+					this
+				);
+			},
+			this
+		);
+	},
+
+	openDatabase: function(data) {
+		var dialog = new Pass.view.KeyDialog({
+			callback: function(dialog, values) {
+				this.loadFile(data, values.masterKey, values.keyFile);
+			},
+			scope: this
+		});
+
+		dialog.show();
 	},
 
 	loadFile: function(data, password, keyFile) {

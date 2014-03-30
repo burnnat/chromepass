@@ -1,10 +1,25 @@
 Ext.require([
+	'Ext.Ajax',
 	'Chrome.util.Clipboard',
 	'Chrome.util.File'
 ]);
 
 Chrome.onSandboxReady(function() {
 	Chrome.Window.api({
+		openUrl: function(call) {
+			Ext.Ajax.request({
+				url: call.data,
+				binary: true,
+
+				callback: function(options, success, response) {
+					call.respond({
+						success: success,
+						response: response.responseBytes
+					});
+				}
+			});
+		},
+
 		chooseFile: function(call) {
 			chrome.fileSystem.chooseEntry(
 				Ext.apply(
