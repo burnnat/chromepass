@@ -50,7 +50,7 @@ Ext.define('Pass.data.proxy.EncryptedFile', {
 		var keyFile = this.keyFile;
 
 		if (keyFile != null) {
-			var dataview = this.parseKeyFile(keyFile);
+			keys.push(this.parseKeyFile(keyFile));
 		}
 
 		this.compositeKey = this.combineKeys(keys);
@@ -86,7 +86,7 @@ Ext.define('Pass.data.proxy.EncryptedFile', {
 		var node = operation.node;
 
 		if (!node || node.isRoot()) {
-			data = this.parseData(this.buffer)
+			data = this.parseData(this.buffer);
 		}
 		else {
 			data = Promise.resolve();

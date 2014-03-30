@@ -152,6 +152,7 @@ Ext.define('Pass.controller.Main', {
 		});
 
 		this.getTree().reconfigure(store);
+		this.getGrid().reconfigure(Ext.getStore('ext-empty-store'));
 
 		store.load({
 			callback: function() {
