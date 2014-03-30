@@ -107,7 +107,8 @@ Ext.define('Pass.data.proxy.EncryptedFile', {
 					}
 				}
 			)
-			.catch(
+			// "catch" is a reserved word in ECMAScript
+			['catch'](
 				function(e) {
 					var error = e.message;
 
