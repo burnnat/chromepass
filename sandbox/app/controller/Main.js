@@ -155,8 +155,15 @@ Ext.define('Pass.controller.Main', {
 		this.getGrid().reconfigure(Ext.getStore('ext-empty-store'));
 
 		store.load({
-			callback: function() {
+			callback: function(records, operation, success) {
 				this.getViewport().setLoading(false);
+
+				if (!success) {
+					Ext.MessageBox.alert(
+						'Error',
+						'Unable to open the database file. Please double-check the password and try again.'
+					);
+				}
 			},
 			scope: this
 		});
