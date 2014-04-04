@@ -14,13 +14,31 @@
 	<target name="-build-all">
 		<ant dir="root" target="build" />
 		<ant dir="sandbox" target="build" />
+		<ant dir="extension" target="build" />
 
-		<copy todir="${basedir}/build/${build.environment}">
+		<local name="build.base" />
+		<property name="build.base" value="${basedir}/build/${build.environment}" />
+
+		<zip destfile="${build.base}-app.zip">
+			<zipfileset dir="${build.base}/root" prefix="root" />
+			<zipfileset dir="${build.base}/sandbox" prefix="sandbox" />
 			<fileset dir="${basedir}">
 				<include name="manifest.json" />
 				<include name="background.js" />
+				<include name="icon_128.png" />
+				<include name="icon_48.png" />
 			</fileset>
-		</copy>
+		</zip>
+
+		<zip destfile="${build.base}-extension.zip">
+			<fileset dir="${build.base}/extension" />
+			<fileset dir="${basedir}/extension" includes="manifest.json" />
+			<fileset dir="${basedir}">
+				<include name="icon_128.png" />
+				<include name="icon_48.png" />
+			</fileset>
+		</zip>
+
 	</target>
 
 </project>

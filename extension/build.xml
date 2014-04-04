@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project name="ChromepassIntegration" default="build">
+
+	<target name="init-cmd">
+		<taskdef
+			resource="com/sencha/ant/antlib.xml"
+			classpath="${cmd.dir}/sencha.jar"
+			loaderref="senchaloader" />
+
+		<x-extend-classpath>
+			<jar path="${cmd.dir}/sencha.jar" />
+		</x-extend-classpath>
+
+		<x-sencha-init prefix="" />
+	</target>
+
+	<target name="build" depends="init-cmd">
+		<local name="build.base" />
+		<property name="build.base" value="${workspace.build.dir}/${build.environment}/extension" />
+
+		<mkdir dir="${build.base}" />
+
+		<x-compress-js
+			srcfile="${basedir}/background.js"
+			outfile="${build.base}/background.js" />
+
+		<x-compress-js
+			srcfile="${basedir}/autotype.js"
+			outfile="${build.base}/autotype.js" />
+	</target>
+
+</project>
