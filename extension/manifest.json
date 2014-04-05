@@ -1,7 +1,12 @@
 {
 	"name": "ChromePass Integration",
-	"version": "0.0.1",
 	"description": "Chrome browser integration for ChromePass.",
+	"version": "0.0.1",
+
+	"icons": {
+		"128": "icon_128.png",
+		"48": "icon_48.png"
+	},
 
 	"manifest_version": 2,
 

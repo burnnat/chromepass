@@ -32,8 +32,8 @@
 
 		<zip destfile="${build.base}-extension.zip">
 			<fileset dir="${build.base}/extension" />
-			<fileset dir="${basedir}/extension" includes="manifest.json" />
-			<fileset dir="${basedir}">
+			<fileset dir="${basedir}/extension">
+				<include name="manifest.json" />
 				<include name="icon_128.png" />
 				<include name="icon_48.png" />
 			</fileset>
