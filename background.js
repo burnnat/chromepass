@@ -22,13 +22,16 @@ var EXTENSION_ID = 'nebajhfbjdffeoondgfjcaknnlhgkpjk';
 /**
  * @param {String} action
  * @param {Object} data
+ * @param {Function} [callback]
  */
-window.notifyExternal = function(action, data) {
+window.notifyExternal = function(action, data, callback) {
 	chrome.runtime.sendMessage(
 		EXTENSION_ID,
 		{
 			action: action,
 			data: data
-		}
+		},
+		{},
+		callback
 	);
 };

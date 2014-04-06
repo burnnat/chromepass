@@ -20,6 +20,8 @@
  *     );
  */
 Ext.define('Chrome.Window', {
+	extend: 'Ext.util.Observable',
+
 	singleton: true,
 
 	requires: [
@@ -39,7 +41,10 @@ Ext.define('Chrome.Window', {
 	callbacks: null,
 
 	constructor: function() {
+		this.callParent(arguments);
+
 		this.callbacks = new Ext.util.HashMap();
+		this.addEvents('remoteapi');
 
 		window.addEventListener(
 			'message',
@@ -82,6 +87,8 @@ Ext.define('Chrome.Window', {
 			},
 			this
 		);
+
+		this.fireEvent('remoteapi', Ext.Object.getKeys(methods));
 	},
 
 	handleRemote: function(name, data, callback, scope) {

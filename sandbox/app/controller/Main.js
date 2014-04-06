@@ -35,6 +35,8 @@ Ext.define('Pass.controller.Main', {
 		}
 	],
 
+	externalEnabled: false,
+
 	/**
 	 * @private
 	 * @property {Pass.model.Entry}
@@ -75,6 +77,39 @@ Ext.define('Pass.controller.Main', {
 				itemcontextmenu: 'onEntryContext'
 			}
 		});
+
+		Chrome.Window.on(
+			'remoteapi',
+			function() {
+				Chrome.Window.notifyExternal(
+					{
+						action: 'register'
+					},
+					function(call) {
+						var response = call.data;
+
+						if (response && response.success) {
+							console.log('Detected external extension');
+							this.setExternalEnabled(true);
+						}
+					},
+					this
+				);
+			},
+			this,
+			{
+				single: true
+			}
+		);
+	},
+
+	setExternalEnabled: function(enabled) {
+		this.externalEnabled = enabled;
+
+		var menu = this.getContextMenu();
+
+		menu.down('#autoType').setDisabled(!enabled);
+		menu.down('#openEntryUrl').setDisabled(!enabled);
 	},
 
 	onOpenFile: function() {
@@ -179,7 +214,7 @@ Ext.define('Pass.controller.Main', {
 		var menu = this.getContextMenu();
 		this.activeEntry = entry;
 
-		menu.down('#autoType').setDisabled(!entry.get('autoTypeEnabled'));
+		menu.down('#autoType').setDisabled(!this.externalEnabled || !entry.get('autoTypeEnabled'));
 		menu.showAt(e.xy);
 	},
 

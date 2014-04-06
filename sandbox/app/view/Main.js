@@ -93,11 +93,13 @@ Ext.define('Pass.view.Main', {
 				},
 				{
 					itemId: 'openEntryUrl',
-					text: 'Open URL'
+					text: 'Open URL',
+					disabled: true
 				},
 				{
 					itemId: 'autoType',
-					text: 'Auto-Type in Chrome'
+					text: 'Auto-Type in Chrome',
+					disabled: true
 				}
 			]
 		});

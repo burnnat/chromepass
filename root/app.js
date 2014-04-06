@@ -54,7 +54,10 @@ Chrome.onSandboxReady(function() {
 				function(page) {
 					page.notifyExternal(
 						data.action,
-						data.data
+						data.data,
+						function(response) {
+							call.respond(response);
+						}
 					);
 				}
 			);

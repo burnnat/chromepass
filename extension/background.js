@@ -1,4 +1,8 @@
 var api = {
+	register: function(data, callback) {
+		callback({ success: true });
+	},
+
 	open: function(data, callback) {
 		chrome.windows.getLastFocused(function(win) {
 			chrome.tabs.create(
